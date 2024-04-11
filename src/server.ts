@@ -75,8 +75,11 @@ const deployAll = async (
   }
 };
 
+// Serve HTML files from the current directory
+app.use("/", express.static("./static"));
+
 // Health check endpoint
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.json({
     message: "hello, please submit your codes to '/deploy' endpoint",
   });
@@ -99,15 +102,15 @@ app.post("/deploy", async (req, res) => {
     const args: DeployContractStruct[] = [];
 
     // sort the contracts by order
-    deployReq.Contracts.sort((a, b) => a.order - b.order);
+    deployReq.contracts.sort((a, b) => a.order - b.order);
 
     // prepare bulkCreate arguments
-    for (const contract of deployReq.Contracts) {
+    for (const contract of deployReq.contracts) {
       const salt = contract.salt || ZERO_BYTES32;
       const tag = `${deployReq.projectName}|${contract.contractName}`;
       const afterCalldatas = contract.functionCalls as BytesLike[];
       const bytecode =
-        contract.deploymenttBytecode ||
+        contract.deploymentBytecode ||
         (await retrieveTransactionData(contract.transactionHash!));
       const expected = await factory.getDeploymentAddress(bytecode, salt);
 
@@ -126,7 +129,7 @@ app.post("/deploy", async (req, res) => {
 
     const deployResp: DeploymentResponse = {
       message: "succeed!",
-      contracts: deployReq.Contracts.map(
+      contracts: deployReq.contracts.map(
         (contract, index) =>
           ({
             order: contract.order,
@@ -139,7 +142,15 @@ app.post("/deploy", async (req, res) => {
     res.json(deployResp);
   } catch (error: any) {
     console.error(error);
-    res.json({ message: error.message });
+    // if error message contains `Create2: Failed on deploy`, it means the contract is already deployed
+    if (error.message.includes("Create2: Failed on deploy")) {
+      return res.status(400).json({
+        message: `
+        It's highly likely that the one of contract has already been deployed. error: ${error.message}`,
+      });
+    }
+    // other errors
+    res.status(400).json({ message: error.message });
   }
 });
 

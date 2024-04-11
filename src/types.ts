@@ -11,14 +11,14 @@ export type DeployContractStruct = {
 
 export interface DeploymentRequest {
   projectName: string; // Required
-  Contracts: ContractDeploymentRequest[]; // Required
+  contracts: ContractDeploymentRequest[]; // Required
 }
 
 export interface ContractDeploymentRequest {
   order: number; // Required
   contractName: string; // Required
   salt?: string; // Optional
-  deploymenttBytecode?: string; // Optional
+  deploymentBytecode?: string; // Optional
   transactionHash?: string; // Optional
   functionCalls?: string[]; // Optional
 }
@@ -42,13 +42,13 @@ export const validateDeploymentRequest = (data: any): DeploymentRequest => {
   // validate projectName
   if (typeof data.projectName !== "string")
     throw new Error("Invalid request body format. projectName is required");
-  // validate Contracts
-  if (!data.Contracts || !Array.isArray(data.Contracts))
+  // validate contracts
+  if (!data.contracts || !Array.isArray(data.contracts))
     throw new Error(
-      "Invalid request body format. Contracts is required and must be an array",
+      "Invalid request body format. contracts is required and must be an array",
     );
 
-  return data.Contracts.every((item: ContractDeploymentRequest) => {
+  data.contracts.every((item: ContractDeploymentRequest) => {
     // validate order
     if (typeof item.order !== "number")
       throw new Error(
@@ -72,13 +72,13 @@ export const validateDeploymentRequest = (data: any): DeploymentRequest => {
       }
     }
     // validate deploymenttBytecode to be hex string
-    if (item.deploymenttBytecode) {
-      if (typeof item.deploymenttBytecode !== "string")
+    if (item.deploymentBytecode) {
+      if (typeof item.deploymentBytecode !== "string")
         throw new Error(
           "Invalid request body format. deploymenttBytecode must be a string",
         );
       try {
-        hexRegex.test(item.deploymenttBytecode);
+        hexRegex.test(item.deploymentBytecode);
       } catch (error) {
         throw new Error(
           "Invalid request body format. deploymenttBytecode must be a hex string",
@@ -111,12 +111,12 @@ export const validateDeploymentRequest = (data: any): DeploymentRequest => {
         );
     }
 
-    if (!item.deploymenttBytecode && !item.transactionHash) {
+    if (!item.deploymentBytecode && !item.transactionHash) {
       throw new Error(
-        "Invalid request body format. Either deploymenttBytecode or transactionHash is required",
+        "Invalid request body format. Either deploymentBytecode or transactionHash is required",
       );
     }
-
-    return true;
   });
+
+  return data as DeploymentRequest;
 };
