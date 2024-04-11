@@ -22,4 +22,5 @@ yarn start
 ## API Endpoints
 - GET /health: Returns a greeting message and instructs to use the /deploy endpoint.
 - POST /deploy: Accepts an array of contract deployment requests. Returns addresses of deployed contracts or an error message.
+- GET /get-address: Get expected address from deployment bytecode.
 - GET /outputs: Returns all the deployments output file names.

@@ -34,6 +34,11 @@ export interface ContractDeploymentResponse {
   address: string; // Required
 }
 
+export interface GetAddressRequest {
+  deploymentBytecode: string;
+  salt?: string;
+}
+
 const txHashRegex = /^0x[a-fA-F0-9]{64}$/;
 const bytes32HexRegex = /^0x[a-fA-F0-9]{64}$/;
 const hexRegex = /^0x[a-fA-F0-9]+$/;
@@ -119,4 +124,30 @@ export const validateDeploymentRequest = (data: any): DeploymentRequest => {
   });
 
   return data as DeploymentRequest;
+};
+
+export const validateGetAddressRequest = (data: any): GetAddressRequest => {
+  if (!data || typeof data !== "object") throw new Error("Invalid request");
+  // validate deploymenttBytecode to be hex string
+  if (typeof data.deploymentBytecode !== "string")
+    throw new Error(
+      "Invalid request body format. deploymenttBytecode must be a string",
+    );
+  if (!hexRegex.test(data.deploymentBytecode)) {
+    throw new Error(
+      "Invalid request body format. deploymenttBytecode must be a hex string",
+    );
+  }
+  // validate salt to be 32 bytes hex string
+  if (data.salt) {
+    if (typeof data.salt !== "string")
+      throw new Error("Invalid request body format. salt must be a string");
+    if (!bytes32HexRegex.test(data.salt)) {
+      throw new Error(
+        "Invalid request body format. salt must be a 32 bytes hex string",
+      );
+    }
+  }
+
+  return data as GetAddressRequest;
 };

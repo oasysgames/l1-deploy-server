@@ -15,7 +15,9 @@ import {
   DeploymentRequest,
   DeploymentResponse,
   ContractDeploymentResponse,
+  GetAddressRequest,
   validateDeploymentRequest,
+  validateGetAddressRequest,
   DeployContractStruct,
 } from "./types";
 
@@ -168,6 +170,30 @@ app.post("/deploy", async (req, res) => {
       });
     }
     // other errors
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Get address endpoint
+app.post("/get-address", async (req, res) => {
+  // validate the request body
+  let addressReq: GetAddressRequest;
+  try {
+    addressReq = validateGetAddressRequest(req.body);
+  } catch (error: any) {
+    return res.status(400).json({
+      message: `Invalid request body format. error: ${error.message}`,
+    });
+  }
+
+  try {
+    const address = await factory.getDeploymentAddress(
+      addressReq.deploymentBytecode,
+      addressReq.salt || ZERO_BYTES32,
+    );
+    res.json({ address });
+  } catch (error: any) {
+    console.error(error);
     res.status(400).json({ message: error.message });
   }
 });

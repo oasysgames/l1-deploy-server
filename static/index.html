@@ -9,6 +9,30 @@
 </head>
 <body>
 
+<!-- Navigation Header -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <!-- Logo image (Ensure the 'src' attribute points to your logo's image file) -->
+            <img src="/logo.png" alt="Logo" height="30">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">Deployment</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/address.html">GetAddress</a>
+                </li>
+                <!-- Add more navigation links here -->
+            </ul>
+        </div>
+    </div>
+</nav>
+
 <div class="container mt-5">
     <h1>Contract Deployment for Oasys</h1>
     <p>Welcome to the Oasys contract deployment portal. By submitting a list of contracts here, you can ensure that your contract sets are ready for deployment on our mainnet.</p>
@@ -53,7 +77,12 @@
     <p class="text-muted">Powered by <a href="https://www.oasys.games/" target="_blank">Oasys</a></p>
 </div>
 
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+<!-- Include jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
 <script>
 $(document).ready(function() {
     // Generate a UUID-like string as next format: [XXXX]-[YYMM]-[XXXX]-[DDHH]
