@@ -15,6 +15,11 @@ Running the Server
 yarn start
 ```
 
+## Front End Navigation
+- / - This route leads to the screen for deploying contracts.
+- /address - Navigate to this screen to obtain the deployment address.
+
 ## API Endpoints
 - GET /health: Returns a greeting message and instructs to use the /deploy endpoint.
 - POST /deploy: Accepts an array of contract deployment requests. Returns addresses of deployed contracts or an error message.
+- GET /outputs: Returns all the deployments output file names.

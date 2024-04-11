@@ -1,7 +1,15 @@
+import fs from "fs";
+import { join } from "path";
 import express from "express";
 import { ethers, BytesLike } from "ethers";
 import dotenv from "dotenv";
-import { getEnvVariable, ZERO_BYTES32, splitArray } from "./util";
+import {
+  getEnvVariable,
+  ZERO_BYTES32,
+  splitArray,
+  writeToJson,
+  formatDate,
+} from "./util";
 import PermissionedContractFactory from "../artifacts/PermissionedContractFactory.json";
 import {
   DeploymentRequest,
@@ -125,7 +133,17 @@ app.post("/deploy", async (req, res) => {
     }
 
     // deploy the contracts
-    await deployAll(factory, args, wallet.address);
+    // await deployAll(factory, args, wallet.address);
+
+    // write to json file to feed to Nsuite
+    const outputPath = join(
+      __dirname,
+      "..",
+      "static",
+      "outputs",
+      `${deployReq.projectName}-${formatDate(new Date())}.json`,
+    );
+    writeToJson(outputPath, args);
 
     const deployResp: DeploymentResponse = {
       message: "succeed!",
@@ -152,6 +170,35 @@ app.post("/deploy", async (req, res) => {
     // other errors
     res.status(400).json({ message: error.message });
   }
+});
+
+// List all the output files
+app.get("/outputs", (req, res) => {
+  const directoryPath = join(__dirname, "..", "static", "outputs");
+  fs.readdir(directoryPath, (error, files) => {
+    if (error) {
+      return res
+        .status(500)
+        .json({ message: "Failed to list files", error: error.message });
+    }
+
+    // Filter out directories if you only want files, not subdirectories
+    const fileCheckPromises = files.map((file) =>
+      fs.promises.stat(join(directoryPath, file)),
+    );
+    Promise.all(fileCheckPromises)
+      .then((results) => {
+        const fileNames = results
+          .map((stat, index) => (stat.isFile() ? files[index] : null))
+          .filter(Boolean);
+        res.json(fileNames);
+      })
+      .catch((error) =>
+        res
+          .status(500)
+          .json({ message: "Error processing files", error: error.message }),
+      );
+  });
 });
 
 // Start the server
