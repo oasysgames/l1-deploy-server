@@ -59,11 +59,17 @@ const deployAll = async (
   factory: any,
   rows: any,
   sender: string,
-): Promise<void> => {
+): Promise<any> => {
+  const results: any[] = [];
   try {
     const tx = await factory.bulkCreate(rows, { from: sender });
     const receipt = await tx.wait();
     console.log(`succeed to deploy: ${receipt?.hash}`);
+    const result1 = rows.map(
+      (row: any) =>
+        ({ tag: row.tag, expected: row.expected, tx: receipt?.hash }) as any,
+    );
+    results.push(...result1);
   } catch (err: any) {
     if (
       err.message.includes("too many contracts") ||
@@ -76,13 +82,16 @@ const deployAll = async (
         );
       }
       const [firstHalf, secondHalf] = splitArray(rows);
-      await deployAll(factory, firstHalf, sender);
-      await deployAll(factory, secondHalf, sender);
+      const results1 = await deployAll(factory, firstHalf, sender);
+      const results2 = await deployAll(factory, secondHalf, sender);
+      results.push(...results1, ...results2);
     } else {
       // Other errors
       throw new Error(`failed: ${err.message}`);
     }
   }
+
+  return results;
 };
 
 // Serve HTML files from the current directory
@@ -135,17 +144,27 @@ app.post("/deploy", async (req, res) => {
     }
 
     // deploy the contracts
-    // await deployAll(factory, args, wallet.address);
+    const results = await deployAll(factory, args, wallet.address);
 
     // write to json file to feed to Nsuite
-    const outputPath = join(
+    const outputJsonPath = join(
       __dirname,
       "..",
       "static",
       "outputs",
       `${deployReq.projectName}-${formatDate(new Date())}.json`,
     );
-    writeToJson(outputPath, args);
+    writeToJson(outputJsonPath, args);
+
+    // write results for Nsuite
+    const outputResultsPath = join(
+      __dirname,
+      "..",
+      "static",
+      "outputs",
+      `${deployReq.projectName}-txs-${formatDate(new Date())}.json`,
+    );
+    writeToJson(outputResultsPath, results);
 
     const deployResp: DeploymentResponse = {
       message: "succeed!",
