@@ -95,7 +95,7 @@ const deployAll = async (
 };
 
 // Serve HTML files from the current directory
-app.use("/", express.static("./static"));
+app.use("/", express.static(join(__dirname, "..", "static")));
 
 // Health check endpoint
 app.get("/health", (req, res) => {
