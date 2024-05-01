@@ -154,7 +154,15 @@ app.post("/deploy", async (req, res) => {
       "outputs",
       `${deployReq.projectName}-${formatDate(new Date())}.json`,
     );
-    writeToJson(outputJsonPath, args);
+    const transformed = args.map(item => [
+      item.amount,
+      item.salt,
+      item.bytecode,
+      item.expected,
+      item.tag,
+      item.afterCalldatas
+    ]);
+    writeToJson(outputJsonPath, transformed);
 
     // write results for Nsuite
     const outputResultsPath = join(
