@@ -26,7 +26,7 @@ dotenv.config();
 
 // Create express app
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Ensure environment variables are present
 const jsonRpcUrl = getEnvVariable("JSON_RPC_URL");
